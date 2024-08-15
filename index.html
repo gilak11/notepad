@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+<link rel="shortcut icon" type="image/x-icon" href="https://cdn-icons-png.flaticon.com/512/4438/4438839.png">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Notepad</title>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
+    <style>
+        * {
+            outline: none;
+        }
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #1e1e1e;
+            color: #f0f0f0;
+        }
+        #app {
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        .tabs {
+            display: flex;
+            background-color: #252525;
+            padding: 10px 10px 0;
+        }
+        .tab {
+            padding: 10px 20px;
+            background-color: #3a3a3a;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            margin-right: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            display: flex;
+            align-items: center;
+        }
+        .tab.active {
+            background-color: #2d2d2d;
+        }
+        .tab:hover {
+            background-color: #4a4a4a;
+        }
+        .tab-close {
+            margin-left: 10px;
+            font-size: 14px;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        .tab-close:hover {
+            opacity: 1;
+        }
+        .new-tab {
+            padding: 10px 20px;
+            background-color: #4a4a4a;
+            border-top-left-radius: 5px;
+            border-top-right-radius: 5px;
+            cursor: pointer;
+        }
+        textarea {
+            flex-grow: 1;
+            width: 100%;
+            background-color: #2d2d2d;
+            color: #f0f0f0;
+            border: none;
+            padding: 20px;
+            font-size: 16px;
+            resize: none;
+            box-sizing: border-box;
+            box-shadow: none;
+        }
+        textarea:focus {
+            outline: none;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <div class="tabs">
+            <div v-for="(tab, index) in tabs" :key="index" 
+                 :class="['tab', { active: index === activeTab }]"
+                 @click="setActiveTab(index)">
+                Tab {{ index + 1 }}
+                <span class="tab-close" @click.stop="closeTab(index)">×</span>
+            </div>
+            <div class="new-tab" @click="newTab">+</div>
+        </div>
+        <textarea v-model="tabs[activeTab].content" @input="saveNotes" placeholder="Start typing your notes here..."></textarea>
+    </div>
+
+    <script>
+        new Vue({
+            el: '#app',
+            data: {
+                tabs: [{ content: '' }],
+                activeTab: 0
+            },
+            mounted() {
+                this.loadNotes();
+            },
+            methods: {
+                setActiveTab(index) {
+                    this.activeTab = index;
+                },
+                newTab() {
+                    this.tabs.push({ content: '' });
+                    this.activeTab = this.tabs.length - 1;
+                    this.saveNotes();
+                },
+                closeTab(index) {
+                    if (this.tabs.length > 1) {
+                        this.tabs.splice(index, 1);
+                        if (this.activeTab >= this.tabs.length) {
+                            this.activeTab = this.tabs.length - 1;
+                        }
+                        this.saveNotes();
+                    }
+                },
+                saveNotes() {
+                    localStorage.setItem('noteTabs', JSON.stringify(this.tabs));
+                },
+                loadNotes() {
+                    const savedTabs = localStorage.getItem('noteTabs');
+                    if (savedTabs) {
+                        this.tabs = JSON.parse(savedTabs);
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html>
